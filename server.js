@@ -1,20 +1,34 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const app = express();
 app.use(express.json());
 const port = 8000;
 
-let notes = [
-  {
-    id: 1,
-    title: "note number 1",
-    description: "description no 1",
-  },
-  {
-    id: 2,
-    title: "note number 2",
-    description: "description no 2",
-  },
-];
+// import data model
+const Note = require("./models/notes");
+
+// connecting to the database
+mongoose
+  .connect("mongodb://localhost:27017/notes-app", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("database connected"))
+  .catch((err) => console.log(err));
+
+//  static data for testing
+// let notes = [
+//   {
+//     id: 1,
+//     title: "note number 1",
+//     description: "description no 1",
+//   },
+//   {
+//     id: 2,
+//     title: "note number 2",
+//     description: "description no 2",
+//   },
+// ];
 
 // root route
 app.get("/", (req, res) => {
@@ -41,11 +55,16 @@ app.get("/notes/:id", (req, res) => {
 });
 
 // add note
-app.post("/notes", (req, res) => {
-  const note = req.body;
+app.post("/notes", async (req, res) => {
+  const note = new Note(req.body);
   //   notes = [...notes, note];
-  notes.push(note);
-  res.send(notes);
+  // notes.push(note);
+  try {
+    await note.save();
+    res.send(note);
+  } catch (err) {
+    res.status(500).send(err.errors.title.message);
+  }
 });
 
 // update note
