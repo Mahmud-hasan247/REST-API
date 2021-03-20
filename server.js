@@ -80,6 +80,21 @@ app.put("/notes/:id", (req, res) => {
   }
 });
 
+// delete note
+app.delete("/notes/:id", (req, res) => {
+  const noteId = parseInt(req.params.id);
+  try {
+    const note = notes.find((note) => note.id === noteId);
+    if (note) {
+      notes = notes.filter((note) => note.id !== noteId);
+      res.status(200).send(notes);
+    } else {
+      res.status(404).send("Note not found");
+    }
+  } catch (e) {
+    res.status(500).send("internal server error");
+  }
+});
 // not found
 app.get("*", (req, res) => {
   res.status(404).send("Not Found 404");
