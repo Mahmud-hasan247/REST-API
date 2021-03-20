@@ -50,7 +50,34 @@ app.post("/notes", (req, res) => {
 
 // update note
 app.put("/notes/:id", (req, res) => {
-  const noteId = req.params.id;
+  const noteId = parseInt(req.params.id);
+  const allNotes = req.body;
+  const infoKeys = Object.keys(allNotes);
+  const allowedForUpdate = ["title", "description"];
+  try {
+    const isAllowed = infoKeys.every((update) =>
+      allowedForUpdate.includes(update)
+    );
+    if (!isAllowed) {
+      return res.status(404).send("invalid operation!");
+    }
+    const note = notes.find((note) => note.id === noteId);
+    if (note) {
+      notes = notes.map((note) => {
+        if (note.id === noteId) {
+          return {
+            ...note,
+            ...allNotes,
+          };
+        } else {
+          return note;
+        }
+      });
+    }
+    res.send(notes);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 });
 
 // not found
